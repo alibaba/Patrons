@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="me.zhilong.tools.abortkiller.demo">
+
+    <uses-sdk tools:overrideLibrary="com.alibaba.android.patronus" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="Patrons"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Patrons"
+        tools:replace="android:icon, android:allowBackup">
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
