@@ -17,8 +17,18 @@
 ## 三、使用方式
 编译`patrons`模块，主工程依赖该模块产物，在合适的时机进行初始化：
 
+```groovy
+   repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+   }
+   dependencies {
+         implementation 'com.alibaba.android:patrons:1.0.6.2'
+   }
+```
+
 ```java
-com.alibaba.android.patronus.Patrons.init(context, null);
+    com.alibaba.android.patronus.Patrons.init(context, null);
 ```
 
 ## 四、Q & A

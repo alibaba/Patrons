@@ -16,6 +16,7 @@ allprojects {
         mavenLocal()
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -24,12 +25,14 @@ task clean(type: Delete) {
 }
 
 ext {
+    groupId = "com.alibaba.android"
+    artifactId = "patrons"
     minSdkVersion = 21
     compileSdkVersion = 29
     targetSdkVersion = 29
     buildToolsVersion = '29.0.2'
     javaVersion = JavaVersion.VERSION_1_6
-    ndkVersion = "20.1.5948944"
+    ndkVersion = "21.1.6352462"
     cmakeVersion = "3.10.2"
     abiFilters = "armeabi-v7a"
     versionName = "1.0.6.2"
