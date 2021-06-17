@@ -31,6 +31,8 @@
     com.alibaba.android.patronus.Patrons.init(context, null);
 ```
 
+##### [→ 测试 Demo 下载](https://github.com/alibaba/Patrons/blob/develop/demo/patrons-demo-1.0.6.2.apk)
+
 ## 四、Q & A
 
 1. SDK 本身会带来多少接入成本(包大小、稳定性)：包大小增加20k左右，可以忽略不计；关键逻辑中会有多层保护，不会引发新的崩溃。
