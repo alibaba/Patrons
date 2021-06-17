@@ -1,5 +1,7 @@
 # Patrons
 
+[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/patrons/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/patrons)
+
 `🎉 A framework for improving android 32bit app stability. (Alleviate crashes caused by insufficient virtual memory)`
 
 一行代码解决 Android 32位应用因虚拟内存不足导致的 libc:abort(signal 6)
@@ -17,9 +19,20 @@
 ## 三、使用方式
 编译`patrons`模块，主工程依赖该模块产物，在合适的时机进行初始化：
 
-```java
-com.alibaba.android.patronus.Patrons.init(context, null);
+```groovy
+   repositories {
+        mavenCentral()
+   }
+   dependencies {
+         implementation 'com.alibaba:patrons:1.0.6.2'
+   }
 ```
+
+```java
+    com.alibaba.android.patronus.Patrons.init(context, null);
+```
+
+##### [→ 测试 Demo 下载](https://github.com/alibaba/Patrons/blob/develop/demo/patrons-demo-1.0.6.2.apk)
 
 ## 四、Q & A
 
