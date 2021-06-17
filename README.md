@@ -23,7 +23,7 @@
         maven { url "https://jitpack.io" }
    }
    dependencies {
-         implementation 'com.alibaba.android:patrons:1.0.6.2'
+         implementation 'com.github.alibaba:Patrons:1.0.6.2'
    }
 ```
 
