@@ -69,7 +69,7 @@ public class _Patrons {
         // Java Init
         int code = __init();
 
-        if (_Patrons.config.recordInitResult) {
+        if (_Patrons.config.recordInitResult && null != context) {
             // Record Init Result
             asyncWriteInitResultToFile(context, code);
         }

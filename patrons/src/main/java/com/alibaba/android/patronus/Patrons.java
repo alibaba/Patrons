@@ -18,7 +18,7 @@ public final class Patrons {
     /**
      * Patrons 入口
      *
-     * @param context android context 用来获取文件目录用的
+     * @param context android context 用来获取文件目录用的，可以不传，就不会本地记录初始化结果了
      * @param config  自定义配置 (如无指导直接传null)
      * @return code, 错误码，无异常则返回 0
      */
