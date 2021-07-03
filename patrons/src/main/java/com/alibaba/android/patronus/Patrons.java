@@ -61,7 +61,7 @@ public final class Patrons {
      * 提取 native 日志，未初始化成功也可以拿到
      */
     public static String dumpNativeLogs() {
-        return _Patrons.dumpNativeLogs();
+        return _Patrons.dumpNativeLogs(true);
     }
 
     /**

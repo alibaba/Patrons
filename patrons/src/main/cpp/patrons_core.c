@@ -335,7 +335,7 @@ Java_com_alibaba_android_patronus__1Patrons_getCurrentRegionSpaceSize(__unused J
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alibaba_android_patronus__1Patrons_dumpLogs(JNIEnv *env, jclass clazz) {
+Java_com_alibaba_android_patronus__1Patrons_dumpLogs(JNIEnv *env, jclass clazz, jboolean cleanAfterDump) {
     if (dump_cursor <= 0) {
         return (*env)->NewStringUTF(env, "the native log buffer is empty");
     }
@@ -358,7 +358,9 @@ Java_com_alibaba_android_patronus__1Patrons_dumpLogs(JNIEnv *env, jclass clazz) 
     free(tmp);
 
     // Dump 完成后清理缓冲区
-    CleanLogBuffer();
+    if (cleanAfterDump) {
+        CleanLogBuffer();
+    }
 
     return logs;
 }
