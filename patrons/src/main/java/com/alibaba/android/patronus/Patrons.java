@@ -18,7 +18,7 @@ public final class Patrons {
     /**
      * Patrons 入口
      *
-     * @param context android context 用来获取文件目录用的
+     * @param context android context 用来获取文件目录用的，可以不传，就不会本地记录初始化结果了
      * @param config  自定义配置 (如无指导直接传null)
      * @return code, 错误码，无异常则返回 0
      */
@@ -61,7 +61,7 @@ public final class Patrons {
      * 提取 native 日志，未初始化成功也可以拿到
      */
     public static String dumpNativeLogs() {
-        return _Patrons.dumpNativeLogs();
+        return _Patrons.dumpNativeLogs(true);
     }
 
     /**

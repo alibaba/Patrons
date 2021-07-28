@@ -69,7 +69,7 @@ public class _Patrons {
         // Java Init
         int code = __init();
 
-        if (_Patrons.config.recordInitResult) {
+        if (_Patrons.config.recordInitResult && null != context) {
             // Record Init Result
             asyncWriteInitResultToFile(context, code);
         }
@@ -208,16 +208,16 @@ public class _Patrons {
     /**
      * Dump native 层的日志
      */
-    static native String dumpLogs();
+    static native String dumpLogs(boolean cleanAfterDump);
 
     private static void stop() {
         inBackground();
         _Patrons.config.auto = false;
     }
 
-    static String dumpNativeLogs() {
+    static String dumpNativeLogs(boolean cleanAfterDump) {
         if (NATIVE_LIB_LOADED) {
-            return dumpLogs();
+            return dumpLogs(cleanAfterDump);
         }
 
         return "can not dump logs without native libs";
@@ -298,7 +298,7 @@ public class _Patrons {
                     stringToFile(String.valueOf(code), patronsFilePath + "code.txt");
 
                     if (code != 0) {
-                        stringToFile(dumpNativeLogs(), patronsFilePath + "msg.txt");
+                        stringToFile(dumpNativeLogs(false), patronsFilePath + "msg.txt");
                     }
                 } catch (Exception ex) {
                     Log.e(TAG, "record init result failed, code = " + code, ex);

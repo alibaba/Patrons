@@ -17,14 +17,14 @@
 通过一系列技术手段实现运行期间动态调整`Region Space`预分配的地址空间，释放出最多`900MB`(根据实际情况调整参数)虚拟内存给到 libc:malloc，增加了接近30%的地址上限，大幅度给应用续命。(细节待补充)
 
 ## 三、使用方式
-编译`patrons`模块，主工程依赖该模块产物，在合适的时机进行初始化：
+编译`patrons`模块 or 使用以下中心仓库的坐标，主工程依赖该模块产物，在合适的时机进行初始化：
 
 ```groovy
    repositories {
         mavenCentral()
    }
    dependencies {
-         implementation 'com.alibaba:patrons:1.0.6.2'
+         implementation 'com.alibaba:patrons:1.0.6.3'
    }
 ```
 

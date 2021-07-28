@@ -22,8 +22,8 @@
 #define __ANDROID_API_R__ 30
 #define __ANDROID_API_S__ 31
 
-// patrson version 定义
-#define __PATRONS_API_VERSION "1.0.6.1"
+// patrons version 定义
+#define __PATRONS_API_VERSION "1.0.6.3"
 
 char *dump_logs[128] = {0};
 char dump_cursor = 0;
@@ -294,14 +294,15 @@ void InitEnv() {
  */
 static void CustomSignalHandler(int sig) {
     if (i_want_handle_signal_flag) {
-        LOGE("found exception signal %d", sig);
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "found exception signal %d", sig);
 
         // reset flag.
         i_want_handle_signal_flag = 0;
 
         siglongjmp(time_machine, 1);
     } else {
-        LOGE("found exception signal %d, but not my business.", sig);
+        // use raw log method, LOGE not thread safe.
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "found exception signal %d, but not my business.", sig);
         sigaction(sig, &sig_act_old[sig], NULL);
     }
 }
