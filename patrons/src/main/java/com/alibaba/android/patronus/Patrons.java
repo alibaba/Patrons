@@ -111,7 +111,7 @@ public final class Patrons {
         /**
          * 是否记录初始化结果
          */
-        public boolean recordInitResult = true;
+        public boolean recordInitResult = false;
 
         @Override
         public String toString() {

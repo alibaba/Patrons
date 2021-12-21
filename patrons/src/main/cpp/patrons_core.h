@@ -23,7 +23,7 @@
 #define __ANDROID_API_S__ 31
 
 // patrons version 定义
-#define __PATRONS_API_VERSION "1.0.6.3"
+#define __PATRONS_API_VERSION "1.0.6.4"
 
 char *dump_logs[128] = {0};
 char dump_cursor = 0;
