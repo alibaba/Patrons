@@ -32,5 +32,5 @@ ext {
     ndkVersion = "20.1.5948944"
     cmakeVersion = "3.10.2"
     abiFilters = "armeabi-v7a"
-    versionName = "1.0.6.3"
+    versionName = "1.0.6.4"
 }

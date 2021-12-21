@@ -336,20 +336,24 @@ Java_com_alibaba_android_patronus__1Patrons_getCurrentRegionSpaceSize(__unused J
 
 JNIEXPORT jstring JNICALL
 Java_com_alibaba_android_patronus__1Patrons_dumpLogs(JNIEnv *env, jclass clazz, jboolean cleanAfterDump) {
-    if (dump_cursor <= 0) {
+    char current_cursor = dump_cursor;
+
+    if (current_cursor <= 0) {
         return (*env)->NewStringUTF(env, "the native log buffer is empty");
     }
 
-    char *tmp = malloc(dump_cursor * 256 * sizeof(char));
-    memset(tmp, 0, dump_cursor * 256 * sizeof(char));
+    char *tmp = malloc(current_cursor * 256 * sizeof(char));
+    memset(tmp, 0, current_cursor * 256 * sizeof(char));
     strcat(tmp, "\nPatrons Core Dump: ");
     strcat(tmp, __PATRONS_API_VERSION);
     strcat(tmp, "↵\n");
 
     // 按行拼接日志
-    for (int i = 0; i < dump_cursor; i++) {
-        strcat(tmp, dump_logs[i]);
-        strcat(tmp, "↵\n");
+    for (int i = 0; i < current_cursor; i++) {
+        if (dump_logs[i] != NULL) {
+            strcat(tmp, dump_logs[i]);
+            strcat(tmp, "↵\n");
+        }
     }
 
     strcat(tmp, "\n");

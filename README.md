@@ -24,7 +24,7 @@
         mavenCentral()
    }
    dependencies {
-         implementation 'com.alibaba:patrons:1.0.6.3'
+         implementation 'com.alibaba:patrons:1.0.6.4'
    }
 ```
 
