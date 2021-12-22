@@ -82,7 +82,9 @@ int NativeInit() {
              __PATRONS_API_VERSION, api_level, debuggable, has_exception_handle_, heapsize);
 
         LOGD("[device] brand = %s", brand);
+        LOGD("[device] system brand = %s", system_brand);
         LOGD("[device] device = %s", device);
+        LOGD("[device] rom version = %s", rom_version);
         LOGD("[device] fingerprint = %s", fingerprint);
 
         // 判断 Android 版本
