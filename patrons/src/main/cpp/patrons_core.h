@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <elf.h>
+#include <pthread.h>
 
 // android api 定义
 #define __ANDROID_API_R__ 30
@@ -140,6 +141,8 @@ size_t offset_region_space_in_heap;
 size_t offset_region_limit_in_region_space;
 size_t offset_num_regions_in_region_space;
 size_t offset_space_bitmap_in_region_space;
+
+pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 
 bool init_ = false;
 bool has_exception_handle_ = false;

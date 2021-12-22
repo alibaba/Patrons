@@ -335,36 +335,43 @@ Java_com_alibaba_android_patronus__1Patrons_getCurrentRegionSpaceSize(__unused J
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alibaba_android_patronus__1Patrons_dumpLogs(JNIEnv *env, jclass clazz, jboolean cleanAfterDump) {
+Java_com_alibaba_android_patronus__1Patrons_dumpLogs(JNIEnv *env, jclass clazz,
+                                                     jboolean cleanAfterDump) {
+    pthread_mutex_lock(&log_lock);
+
     char current_cursor = dump_cursor;
 
+    jstring logs;
+
     if (current_cursor <= 0) {
-        return (*env)->NewStringUTF(env, "the native log buffer is empty");
-    }
+        logs = (*env)->NewStringUTF(env, "the native log buffer is empty");
+    } else {
+        char *tmp = malloc(current_cursor * 256 * sizeof(char));
+        memset(tmp, 0, current_cursor * 256 * sizeof(char));
+        strcat(tmp, "\nPatrons Core Dump: ");
+        strcat(tmp, __PATRONS_API_VERSION);
+        strcat(tmp, "↵\n");
 
-    char *tmp = malloc(current_cursor * 256 * sizeof(char));
-    memset(tmp, 0, current_cursor * 256 * sizeof(char));
-    strcat(tmp, "\nPatrons Core Dump: ");
-    strcat(tmp, __PATRONS_API_VERSION);
-    strcat(tmp, "↵\n");
+        // 按行拼接日志
+        for (int i = 0; i < current_cursor; i++) {
+            if (dump_logs[i] != NULL) {
+                strcat(tmp, dump_logs[i]);
+                strcat(tmp, "↵\n");
+            }
+        }
 
-    // 按行拼接日志
-    for (int i = 0; i < current_cursor; i++) {
-        if (dump_logs[i] != NULL) {
-            strcat(tmp, dump_logs[i]);
-            strcat(tmp, "↵\n");
+        strcat(tmp, "\n");
+
+        logs = (*env)->NewStringUTF(env, tmp);
+        free(tmp);
+
+        // Dump 完成后清理缓冲区
+        if (cleanAfterDump) {
+            CleanLogBuffer();
         }
     }
 
-    strcat(tmp, "\n");
-
-    jstring logs = (*env)->NewStringUTF(env, tmp);
-    free(tmp);
-
-    // Dump 完成后清理缓冲区
-    if (cleanAfterDump) {
-        CleanLogBuffer();
-    }
+    pthread_mutex_unlock(&log_lock);
 
     return logs;
 }
