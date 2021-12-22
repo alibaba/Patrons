@@ -17,13 +17,14 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <elf.h>
+#include <pthread.h>
 
 // android api 定义
 #define __ANDROID_API_R__ 30
 #define __ANDROID_API_S__ 31
 
 // patrons version 定义
-#define __PATRONS_API_VERSION "1.0.6.4"
+#define __PATRONS_API_VERSION "1.0.6.5"
 
 char *dump_logs[128] = {0};
 char dump_cursor = 0;
@@ -93,10 +94,12 @@ bool debuggable;
 int api_level;
 
 // 当前机型
-char brand[128];
-char device[128];
-char heapsize[16];
-char fingerprint[512];
+char brand[64] = {0};
+char system_brand[64] = {0};
+char device[128] = {0};
+char heapsize[16] = {0};
+char fingerprint[512] = {0};
+char rom_version[128] = {0};
 
 // 函数原型
 typedef void *(*stub_method_in_art_)();
@@ -141,6 +144,8 @@ size_t offset_region_limit_in_region_space;
 size_t offset_num_regions_in_region_space;
 size_t offset_space_bitmap_in_region_space;
 
+pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
+
 bool init_ = false;
 bool has_exception_handle_ = false;
 
@@ -169,7 +174,7 @@ bool IsAndroidVersionMatch() {
  * offset_heap_in_runtime <<= art::Runtime::RunRootClinits() 第一行找到 class_linker_ 往前推10个指针
  * offset_region_space_in_heap <<= art::gc::Heap::TrimSpaces() 中间连续三个 if 的最后一个 if (涉及到 art::gc::space::RegionSpace::GetBytesAllocated())
  *
- * 1. > Android 8  : offset_region_limit_in_region_space <<= art::Heap::Space::RegionSpace::ClampGrowthLimit()
+ * 1. > Android 8  : offset_region_limit_in_region_space <<= art::Heap::Space::RegionSpace::ClampGrowthLimit(), 找到和右移12的参数进行比较的部分
  * 2. <= Android 8 : offset_region_limit_in_region_space = current_region_ -4 <<= art::gc::space::RegionSpace::Clear() 倒数第二个赋值反推
  *
  * offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 3
@@ -228,7 +233,7 @@ void DefineOffset() {
 
             break;
         case __ANDROID_API_R__: // 11
-            offset_heap_in_runtime = 0xEC;
+            offset_heap_in_runtime = 0x114 - 4 * 10;
             offset_region_space_in_heap = 0x208;
             offset_region_limit_in_region_space = 0x160;
 
@@ -238,6 +243,11 @@ void DefineOffset() {
 
             if (strcasecmp(brand, "samsung") == 0) {
                 offset_region_space_in_heap = 0x210;
+            }
+
+            // 特殊支持 oppo oneplus 的 color os 12
+            if (strcasecmp(rom_version, "V12") && (strcasecmp(brand, "oppo") || strcasecmp(brand, "oneplus"))) {
+                offset_region_space_in_heap = 0x218;
             }
 
             // Android 11 多了一个 map
@@ -279,12 +289,23 @@ const char *GetArtPath() {
 void InitEnv() {
     // 厂商
     __system_property_get("ro.product.brand", brand);
+    // 厂商品牌
+    __system_property_get("ro.product.system.brand", system_brand);
     // 型号
     __system_property_get("ro.product.model", device);
     // 默认堆大小
     __system_property_get("dalvik.vm.heapsize", heapsize);
     // ROM 信息
     __system_property_get("ro.build.fingerprint", fingerprint);
+
+    // 拼接自定义 ROM Version 的配置名
+    char custom_rom_config_name[128] = {0};
+    strcat(custom_rom_config_name, "ro.build.version.");
+    strcat(custom_rom_config_name, system_brand);
+    strcat(custom_rom_config_name, "rom");
+
+    // ROM Version
+    __system_property_get(custom_rom_config_name, rom_version);
 
     api_level = android_get_device_api_level();
 }
