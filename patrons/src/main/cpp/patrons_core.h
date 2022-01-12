@@ -24,7 +24,7 @@
 #define __ANDROID_API_S__ 31
 
 // patrons version 定义
-#define __PATRONS_API_VERSION "1.0.6.5"
+#define __PATRONS_API_VERSION "1.1.0"
 
 char *dump_logs[128] = {0};
 char dump_cursor = 0;
@@ -160,8 +160,8 @@ static sigjmp_buf time_machine;
  * 判断是否是支持的 Android 版本
  */
 bool IsAndroidVersionMatch() {
-    if (api_level < __ANDROID_API_O__ || api_level > __ANDROID_API_R__) {
-        LOGE("support android [8 - 11], but current api is %d", api_level);
+    if (api_level < __ANDROID_API_O__ || api_level > __ANDROID_API_S__) {
+        LOGE("support android [8 - 12], but current api is %d", api_level);
         return false;
     }
 
@@ -174,7 +174,7 @@ bool IsAndroidVersionMatch() {
  * offset_heap_in_runtime <<= art::Runtime::RunRootClinits() 第一行找到 class_linker_ 往前推10个指针
  * offset_region_space_in_heap <<= art::gc::Heap::TrimSpaces() 中间连续三个 if 的最后一个 if (涉及到 art::gc::space::RegionSpace::GetBytesAllocated())
  *
- * 1. > Android 8  : offset_region_limit_in_region_space <<= art::Heap::Space::RegionSpace::ClampGrowthLimit(), 找到和右移12的参数进行比较的部分
+ * 1. > Android 8  : offset_region_limit_in_region_space <<= art::Heap::Space::RegionSpace::ClampGrowthLimit(), 找到和右移0x12的参数进行比较的部分
  * 2. <= Android 8 : offset_region_limit_in_region_space = current_region_ -4 <<= art::gc::space::RegionSpace::Clear() 倒数第二个赋值反推
  *
  * offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 3
@@ -245,13 +245,17 @@ void DefineOffset() {
                 offset_region_space_in_heap = 0x210;
             }
 
-            // 特殊支持 oppo oneplus 的 color os 12
-            if (strcasecmp(rom_version, "V12") && (strcasecmp(brand, "oppo") || strcasecmp(brand, "oneplus"))) {
-                offset_region_space_in_heap = 0x218;
-            }
-
             // Android 11 多了一个 map
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5 - 12;
+
+            break;
+        case __ANDROID_API_S__: // 12
+            offset_heap_in_runtime = 0x120 - 4 * 10;
+            offset_region_space_in_heap = 0x210;
+            offset_region_limit_in_region_space = 0x16c;
+
+            // Android 12 在 Android 11 的基础上多了 1 个 uint64_t 1 个 size_t
+            offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5 - 12 - 8 - 4;
 
             break;
     }

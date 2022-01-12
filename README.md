@@ -13,6 +13,8 @@
 
 针对此问题，一般首先能想到的就是排查内存泄漏问题，但往往收效甚微，多半是因为随着业务的发展，确实是需要这么多虚拟内存。诚然通过升级64位架构可以把地址空间上限扩充到512GB，但是因为各种原因(包大小、维护成本等等)，目前大部分应用尚未完成升级，所以在这里提供一种新的思路。
 
+(还是推荐大家尽快把自己的应用升级到64位架构哦~ 至少是双ABI架构，32位版本中可以继续保留 Patrons 用于提升存量用户的体验。)
+
 ## 二、原理
 通过一系列技术手段实现运行期间动态调整`Region Space`预分配的地址空间，释放出最多`900MB`(根据实际情况调整参数)虚拟内存给到 libc:malloc，增加了接近30%的地址上限，大幅度给应用续命。
 
@@ -26,7 +28,7 @@
         mavenCentral()
    }
    dependencies {
-         implementation 'com.alibaba:patrons:1.0.6.5'
+         implementation 'com.alibaba:patrons:1.1.0'
    }
 ```
 
@@ -34,12 +36,12 @@
     com.alibaba.android.patronus.Patrons.init(context, null);
 ```
 
-##### [→ 测试 Demo 下载](https://github.com/alibaba/Patrons/blob/develop/demo/patrons-demo-1.0.6.2.apk)
+##### [→ 测试 Demo 下载](https://github.com/alibaba/Patrons/blob/develop/demo/patrons-demo-1.1.0.apk)
 
 ## 四、Q & A
 
 1. SDK 本身会带来多少接入成本(包大小、稳定性)：包大小增加20k左右，可以忽略不计；关键逻辑中会有多层保护，不会引发新的崩溃。
 
-2. SDK 兼容性怎么样：在 Android 8、8.1、9、10、11 共 5 个主流版本生效，覆盖率接近 99.9%。在未兼容机型中不会生效，亦不会产生新的崩溃。
+2. SDK 兼容性怎么样：在 Android 8、8.1、9、10、11、12 共 6 个主流版本生效，覆盖率接近 99.9%。在未兼容机型中不会生效，亦不会产生新的崩溃。
 
 3. 使用后就能根治 Abort 么：肯定不能，因为 Abort 的成因很多，虽然32位应用多半是因为虚拟内存不足，但是也可能存在其他问题，适配性还是要具体情况具体分析。
