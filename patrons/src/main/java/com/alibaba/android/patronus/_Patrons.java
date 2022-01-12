@@ -26,8 +26,6 @@ public class _Patrons {
     private static final long MB = 1024 * KB;
     private static final long GB = 1024 * MB;
 
-    private static final int VERSION_CODES_R = 30;
-
     // 错误码和 native 层的状态不能冲突
     private static final int ERROR_READ_VSS_FAILED = 1001;
     private static final int ANDROID_VERSION_NOT_SUPPORT = 2001;
@@ -276,11 +274,11 @@ public class _Patrons {
 
     /**
      * 是否需要 Patrons
-     * 支持 Android 8 ~ 11 的 32 位应用
+     * 支持 Android 8 ~ 12 的 32 位应用
      */
     private static boolean isSupport() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                Build.VERSION.SDK_INT <= VERSION_CODES_R &&
+                Build.VERSION.SDK_INT <= Build.VERSION_CODES.S &&
                 !android.os.Process.is64Bit();
     }
 
