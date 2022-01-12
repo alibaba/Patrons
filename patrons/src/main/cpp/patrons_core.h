@@ -245,11 +245,6 @@ void DefineOffset() {
                 offset_region_space_in_heap = 0x210;
             }
 
-            // 特殊支持 oppo oneplus 的 color os 12
-            if (strcasecmp(rom_version, "V12") && (strcasecmp(brand, "oppo") || strcasecmp(brand, "oneplus"))) {
-                offset_region_space_in_heap = 0x218;
-            }
-
             // Android 11 多了一个 map
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5 - 12;
 
