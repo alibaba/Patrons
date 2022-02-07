@@ -224,7 +224,6 @@ void DefineOffset() {
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5;
 
             break;
-        default:
         case __ANDROID_API_Q__:  // 10
             offset_heap_in_runtime = 0x118 - 4 * 10;
             offset_region_space_in_heap = 0x1ec;
@@ -257,6 +256,8 @@ void DefineOffset() {
             // Android 12 在 Android 11 的基础上多了 1 个 uint64_t 1 个 size_t
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5 - 12 - 8 - 4;
 
+            break;
+        default: // no-op
             break;
     }
 }
