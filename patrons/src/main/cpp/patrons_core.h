@@ -83,6 +83,9 @@ enum Code {
     REGION_SPACE_LOAD_FAILED,
     LOADER_FUNCTION_NOT_FOUND = 4001,
     RESIZE_METHOD_NOT_FOUND,
+    EXCLUSIVELOCK_METHOD_NOT_FOUND,
+    EXCLUSIVEUNLOCK_METHOD_NOT_FOUND,
+    THREADCURRENT_METHOD_NOT_FOUND,
     FINAL_CHECK_FAILED = 9001,
     NATIVE_INIT_SEGMENT_FAULT = 10001
 };
@@ -114,6 +117,12 @@ typedef void *(*SetHeapSize_)(void *, size_t);
 
 typedef void *(*SetSize_)(void *, size_t);
 
+typedef void *(*ExclusiveLock_)(void *, void *);
+
+typedef void *(*ExclusiveUnlock_)(void *, void *);
+
+typedef void *(*ThreadCurrent_)();
+
 typedef FILE *(*fopen_)(const char *__path, const char *__mode);
 
 // method
@@ -123,6 +132,9 @@ __loader_dlsym_ __loader_dlsym;
 stub_method_in_art_ stub_method_in_art;
 SetHeapSize_ SetHeapSize;
 SetSize_ SetSize;
+ExclusiveLock_ ExclusiveLock;
+ExclusiveUnlock_ ExclusiveUnlock;
+ThreadCurrent_ ThreadCurrent;
 fopen_ __fopen;
 
 // instance space.
