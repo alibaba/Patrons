@@ -199,10 +199,28 @@ void DefineOffset() {
             offset_region_limit_in_region_space = 0x7c - 4;
 
             if (strcasecmp(brand, "samsung") == 0) {
-                if (memcmp(device, "SM-C", 4) == 0) {
+                if (memcmp(device, "SM-C", 4) == 0 ||
+                    memcmp(device, "SM-A7", 5) == 0 ||
+                    memcmp(device, "SM-A5", 5) == 0 ||
+                    memcmp(device, "SM-A3", 5) == 0 ||
+                    memcmp(device, "SM-A605", 7) == 0 ||
+                    memcmp(device, "SM-J", 4) == 0 ||
+                    memcmp(device, "SM-G5", 5) == 0) {
+                    // SM-C --
+                    // SM-A7 -- SM-A750FN SM-A750F
+                    // SM-A5 -- SM-A520W SM-A520F
+                    // SM-A3 -- SM-A320F SM-A320FL
+                    // SM-A605 -- SM-A605FN
+                    // SM-J -- SM-J600G SM-J330FN SM-J810M SM-J810F SM-J600FN
+                    // SM-G5 -- SM-G570F
                     offset_region_space_in_heap = 0x1d4;
                     offset_region_limit_in_region_space = 0x74 - 4;
-                } else if (memcmp(device, "SM-G93", 6) == 0) {
+                } else if (memcmp(device, "SM-N", 4) == 0 ||
+                    memcmp(device, "SM-G9", 5) == 0 ||
+                    memcmp(device, "SM-A600", 7) == 0) {
+                    // SM-N -- SM-N950F SM-N950N SM-N950U
+                    // SM-G9 -- SM-G965F SM-G965U SM-G9650 SM-G9600 SM-G950F SM-G955U SM-G955F SM-G930F SM-G935F
+                    // SM-A600 -- SM-A600FN
                     offset_region_space_in_heap = 0x1dc;
                     offset_region_limit_in_region_space = 0x7c - 4;
                 } else {
@@ -221,8 +239,20 @@ void DefineOffset() {
             offset_region_limit_in_region_space = 0x7c - 4;
 
             if (strcasecmp(brand, "samsung") == 0) {
-                offset_region_space_in_heap = 0x1dc;
-                offset_region_limit_in_region_space = 0x74 - 4;
+                if (memcmp(device, "SM-G6", 5) == 0) {
+                    // SM-G6 -- SM-G6200
+                    offset_region_space_in_heap = 0x1e4;
+                } else if (memcmp(device, "SM-J", 4) == 0 ||
+                    memcmp(device, "SM-G8", 5) == 0 ||
+                    memcmp(device, "SM-N", 4) == 0) {
+                    // SM-J -- SM-J530L SM-J710F SM-J730FM
+                    // SM-G8 -- SM-G8870
+                    // SM-N -- SM-N960F SM-N960U
+                    offset_region_space_in_heap = 0x1dc;
+                    offset_region_limit_in_region_space = 0x74 - 4;
+                } else {
+                    offset_region_space_in_heap = 0x1dc;
+                }
             }
 
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 3;
