@@ -296,6 +296,11 @@ void DefineOffset() {
             offset_region_space_in_heap = 0x210;
             offset_region_limit_in_region_space = 0x16c;
 
+            if (memcmp(device, "SM-S901N", 8) == 0) {
+                offset_heap_in_runtime = 0x150 - 4 * 10;
+                offset_region_space_in_heap = 0x218;
+            }
+
             // Android 12 在 Android 11 的基础上多了 1 个 uint64_t 1 个 size_t
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5 - 12 - 8 - 4;
 
