@@ -62,15 +62,22 @@ void FindSymbol(bool sync, bool isFixHuaweiBinder) {
  * ClampGrowthLimit method when less than Android P
  */
 void ClampGrowthLimit__(void *region_space, size_t new_capacity) {
-    *num_regions_ = new_capacity / kRegionSize;
-    *limit_ = *begin_ + new_capacity;
-    if ((*end_ - *begin_) > new_capacity) {
-        *end_ = *limit_;
+    ExclusiveLock((void *) ((size_t) region_space + 0x38), ThreadCurrent());
+
+    size_t used = *non_free_region_index_limit_ * kRegionSize;
+    if (new_capacity > used) {
+        *num_regions_ = new_capacity / kRegionSize;
+        *limit_ = *begin_ + new_capacity;
+        if ((*end_ - *begin_) > new_capacity) {
+            *end_ = *limit_;
+        }
+
+        SetHeapSize(*(void **) ((size_t) region_space + offset_space_bitmap_in_region_space),
+                    new_capacity);
+        SetSize(*(void **) ((size_t) region_space + 0x20), new_capacity);
     }
 
-    SetHeapSize(*(void **) ((size_t) region_space + offset_space_bitmap_in_region_space),
-                new_capacity);
-    SetSize(*(void **) ((size_t) region_space + 0x20), new_capacity);
+    ExclusiveUnlock((void *) ((size_t) region_space + 0x38), ThreadCurrent());
 }
 
 /**
@@ -164,14 +171,32 @@ int NativeInit() {
 
         if (api_level >= __ANDROID_API_P__) {
             ClampGrowthLimit = (ClampGrowthLimit_) DLSYM(art_, kClampGrowthLimit);
+
+            if (ClampGrowthLimit == NULL) {
+                LOGE("resize method is NULL");
+                return RESIZE_METHOD_NOT_FOUND;
+            }
         } else {
             // < Android P, no this method.
             ClampGrowthLimit = (ClampGrowthLimit_) ClampGrowthLimit__;
-        }
 
-        if (ClampGrowthLimit == NULL) {
-            LOGE("resize method is NULL");
-            return RESIZE_METHOD_NOT_FOUND;
+            ExclusiveLock = (ExclusiveLock_) DLSYM(art_, "_ZN3art5Mutex13ExclusiveLockEPNS_6ThreadE");
+            if (ExclusiveLock == NULL) {
+                LOGE("ExclusiveLock method is NULL");
+                return EXCLUSIVELOCK_METHOD_NOT_FOUND;
+            }
+
+            ExclusiveUnlock = (ExclusiveUnlock_) DLSYM(art_, "_ZN3art5Mutex15ExclusiveUnlockEPNS_6ThreadE");
+            if (ExclusiveUnlock == NULL) {
+                LOGE("ExclusiveUnlock method is NULL");
+                return EXCLUSIVEUNLOCK_METHOD_NOT_FOUND;
+            }
+
+            ThreadCurrent = (ThreadCurrent_) DLSYM(art_, "_ZN3art6Thread14CurrentFromGdbEv");
+            if (ThreadCurrent == NULL) {
+                LOGE("ThreadCurrent method is NULL");
+                return THREADCURRENT_METHOD_NOT_FOUND;
+            }
         }
 
         LOGD("[instance] m_ = %p", ClampGrowthLimit);

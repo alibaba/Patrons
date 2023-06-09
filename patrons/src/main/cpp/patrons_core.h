@@ -83,6 +83,9 @@ enum Code {
     REGION_SPACE_LOAD_FAILED,
     LOADER_FUNCTION_NOT_FOUND = 4001,
     RESIZE_METHOD_NOT_FOUND,
+    EXCLUSIVELOCK_METHOD_NOT_FOUND,
+    EXCLUSIVEUNLOCK_METHOD_NOT_FOUND,
+    THREADCURRENT_METHOD_NOT_FOUND,
     FINAL_CHECK_FAILED = 9001,
     NATIVE_INIT_SEGMENT_FAULT = 10001
 };
@@ -114,6 +117,12 @@ typedef void *(*SetHeapSize_)(void *, size_t);
 
 typedef void *(*SetSize_)(void *, size_t);
 
+typedef void *(*ExclusiveLock_)(void *, void *);
+
+typedef void *(*ExclusiveUnlock_)(void *, void *);
+
+typedef void *(*ThreadCurrent_)();
+
 typedef FILE *(*fopen_)(const char *__path, const char *__mode);
 
 // method
@@ -123,6 +132,9 @@ __loader_dlsym_ __loader_dlsym;
 stub_method_in_art_ stub_method_in_art;
 SetHeapSize_ SetHeapSize;
 SetSize_ SetSize;
+ExclusiveLock_ ExclusiveLock;
+ExclusiveUnlock_ ExclusiveUnlock;
+ThreadCurrent_ ThreadCurrent;
 fopen_ __fopen;
 
 // instance space.
@@ -187,10 +199,28 @@ void DefineOffset() {
             offset_region_limit_in_region_space = 0x7c - 4;
 
             if (strcasecmp(brand, "samsung") == 0) {
-                if (memcmp(device, "SM-C", 4) == 0) {
+                if (memcmp(device, "SM-C", 4) == 0 ||
+                    memcmp(device, "SM-A7", 5) == 0 ||
+                    memcmp(device, "SM-A5", 5) == 0 ||
+                    memcmp(device, "SM-A3", 5) == 0 ||
+                    memcmp(device, "SM-A605", 7) == 0 ||
+                    memcmp(device, "SM-J", 4) == 0 ||
+                    memcmp(device, "SM-G5", 5) == 0) {
+                    // SM-C --
+                    // SM-A7 -- SM-A750FN SM-A750F
+                    // SM-A5 -- SM-A520W SM-A520F
+                    // SM-A3 -- SM-A320F SM-A320FL
+                    // SM-A605 -- SM-A605FN
+                    // SM-J -- SM-J600G SM-J330FN SM-J810M SM-J810F SM-J600FN
+                    // SM-G5 -- SM-G570F
                     offset_region_space_in_heap = 0x1d4;
                     offset_region_limit_in_region_space = 0x74 - 4;
-                } else if (memcmp(device, "SM-G93", 6) == 0) {
+                } else if (memcmp(device, "SM-N", 4) == 0 ||
+                    memcmp(device, "SM-G9", 5) == 0 ||
+                    memcmp(device, "SM-A600", 7) == 0) {
+                    // SM-N -- SM-N950F SM-N950N SM-N950U
+                    // SM-G9 -- SM-G965F SM-G965U SM-G9650 SM-G9600 SM-G950F SM-G955U SM-G955F SM-G930F SM-G935F
+                    // SM-A600 -- SM-A600FN
                     offset_region_space_in_heap = 0x1dc;
                     offset_region_limit_in_region_space = 0x7c - 4;
                 } else {
@@ -209,8 +239,20 @@ void DefineOffset() {
             offset_region_limit_in_region_space = 0x7c - 4;
 
             if (strcasecmp(brand, "samsung") == 0) {
-                offset_region_space_in_heap = 0x1dc;
-                offset_region_limit_in_region_space = 0x74 - 4;
+                if (memcmp(device, "SM-G6", 5) == 0) {
+                    // SM-G6 -- SM-G6200
+                    offset_region_space_in_heap = 0x1e4;
+                } else if (memcmp(device, "SM-J", 4) == 0 ||
+                    memcmp(device, "SM-G8", 5) == 0 ||
+                    memcmp(device, "SM-N", 4) == 0) {
+                    // SM-J -- SM-J530L SM-J710F SM-J730FM
+                    // SM-G8 -- SM-G8870
+                    // SM-N -- SM-N960F SM-N960U
+                    offset_region_space_in_heap = 0x1dc;
+                    offset_region_limit_in_region_space = 0x74 - 4;
+                } else {
+                    offset_region_space_in_heap = 0x1dc;
+                }
             }
 
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 3;
@@ -253,6 +295,11 @@ void DefineOffset() {
             offset_heap_in_runtime = 0x120 - 4 * 10;
             offset_region_space_in_heap = 0x210;
             offset_region_limit_in_region_space = 0x16c;
+
+            if (memcmp(device, "SM-S901N", 8) == 0) {
+                offset_heap_in_runtime = 0x150 - 4 * 10;
+                offset_region_space_in_heap = 0x218;
+            }
 
             // Android 12 在 Android 11 的基础上多了 1 个 uint64_t 1 个 size_t
             offset_num_regions_in_region_space = offset_region_limit_in_region_space - 4 * 5 - 12 - 8 - 4;
