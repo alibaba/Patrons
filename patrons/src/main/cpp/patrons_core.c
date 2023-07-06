@@ -250,7 +250,7 @@ Java_com_alibaba_android_patronus__1Patrons__1_1init(__unused JNIEnv *env, __unu
         LOGE("signal handler reg failed.");
     } else {
         has_exception_handle_ = true;
-        LOGI("signal handler reg success, old handler = %p", &sig_act_old[SIGSEGV]);
+        LOGI("signal handler reg success, old handler = %p", &sig_act_old);
     }
 
     int initCode;
@@ -325,11 +325,12 @@ Java_com_alibaba_android_patronus__1Patrons_shrinkRegionSpace(__unused JNIEnv *e
         return false;
     }
 
+    bool ret = false;
     if (ClampGrowthLimit && region_space_) {
         if (has_exception_handle_ && !debuggable) {
             i_want_handle_signal_flag = 1;
             if (0 == sigsetjmp(time_machine, 1)) {
-                ResizeRegionSpace(new_size * MB);
+                ret = ResizeRegionSpace(new_size * MB);
             } else {
                 LOGE("resize failed, found exception signal.");
                 return false;
@@ -337,7 +338,7 @@ Java_com_alibaba_android_patronus__1Patrons_shrinkRegionSpace(__unused JNIEnv *e
 
             i_want_handle_signal_flag = 0;
         } else {
-            return ResizeRegionSpace(new_size * MB);
+            ret = ResizeRegionSpace(new_size * MB);
         }
     } else {
         LOGE("resize failed, key param is NULL, instance = %p, method = %p.",
@@ -347,7 +348,7 @@ Java_com_alibaba_android_patronus__1Patrons_shrinkRegionSpace(__unused JNIEnv *e
         return false;
     }
 
-    return true;
+    return ret;
 }
 
 JNIEXPORT jlong JNICALL

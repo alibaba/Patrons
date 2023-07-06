@@ -164,7 +164,7 @@ bool has_exception_handle_ = false;
 /**
  * 异常处理
  */
-static struct sigaction sig_act_old[16] = {0};
+static struct sigaction sig_act_old = {0};
 static volatile int i_want_handle_signal_flag = 0;
 static sigjmp_buf time_machine;
 
@@ -364,9 +364,9 @@ void InitEnv() {
 /**
  * 自定义异常处理函数
  */
-static void CustomSignalHandler(int sig) {
+static void CustomSignalHandler(int signum, siginfo_t* siginfo, void* context) {
     if (i_want_handle_signal_flag) {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "found exception signal %d", sig);
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "found exception signal %d", signum);
 
         // reset flag.
         i_want_handle_signal_flag = 0;
@@ -374,8 +374,22 @@ static void CustomSignalHandler(int sig) {
         siglongjmp(time_machine, 1);
     } else {
         // use raw log method, LOGE not thread safe.
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "found exception signal %d, but not my business.", sig);
-        sigaction(sig, &sig_act_old[sig], NULL);
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "found exception signal %d, but not my business.", signum);
+
+        // sigaction(sig, &sig_act_old, NULL);
+        if (sig_act_old.sa_flags & SA_SIGINFO) {
+            sig_act_old.sa_sigaction(signum, siginfo, context);
+        } else {
+            if (SIG_DFL == sig_act_old.sa_handler) {
+                // If the previous handler was the default handler, cause a core dump.
+                signal(signum, SIG_DFL);
+                raise(signum);
+            } else if (SIG_IGN == sig_act_old.sa_handler) {
+                return;
+            } else {
+                sig_act_old.sa_handler(signum);
+            }
+        }
     }
 }
 
@@ -383,17 +397,16 @@ static void CustomSignalHandler(int sig) {
  * 覆盖特定信号的处理函数
  */
 static int HandleSignal(int sig) {
-    struct sigaction act, handler;
+    struct sigaction act = {0};
 
     if (0 != sigemptyset(&act.sa_mask))
         return (0 == errno ? SIGNAL_HANDLER_REG_ERROR : errno);
 
-    act.sa_handler = CustomSignalHandler;
+    act.sa_flags = SA_SIGINFO | SA_ONSTACK | SA_RESTART;
+    act.sa_sigaction = CustomSignalHandler;
 
-    if (0 != sigaction(sig, &act, &handler))
+    if (0 != sigaction(sig, &act, &sig_act_old))
         return (0 == errno ? SIGNAL_HANDLER_REG_ERROR : errno);
-
-    sig_act_old[sig] = handler;
 
     return 0;
 }
